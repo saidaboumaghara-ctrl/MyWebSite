@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ملفي الشخصي</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Tajawal:wght@300;400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0a0a0f;
+    --paper: #f5f0e8;
+    --gold: #c9a84c;
+    --gold-light: #e8d08a;
+    --rust: #c0392b;
+    --teal: #1a6b6b;
+    --cream: #faf7f2;
+    --shadow: rgba(10,10,15,0.15);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Cairo', sans-serif;
+    background: var(--ink);
+    color: var(--paper);
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* Custom Cursor */
+  .cursor {
+    width: 12px; height: 12px;
+    background: var(--gold);
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+    transition: transform 0.15s ease, opacity 0.15s;
+    transform: translate(-50%, -50%);
+  }
+  .cursor-ring {
+    width: 36px; height: 36px;
+    border: 1.5px solid var(--gold);
+    border-radius: 50%;
+    position: fixed;
+    pointer-events: none;
+    z-index: 9998;
+    transition: transform 0.35s cubic-bezier(.23,1,.32,1), opacity 0.3s;
+    transform: translate(-50%, -50%);
+    opacity: 0.5;
+  }
+
+  /* NOISE OVERLAY */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9000;
+    opacity: 0.5;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 1000;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 4rem;
+    mix-blend-mode: difference;
+  }
+  .nav-logo {
+    font-family: 'Tajawal', sans-serif;
+    font-weight: 900;
+    font-size: 1.4rem;
+    letter-spacing: 0.05em;
+    color: var(--paper);
+    text-decoration: none;
+  }
+  .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+  .nav-links a {
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    color: var(--paper);
+    text-decoration: none;
+    opacity: 0.7;
+    transition: opacity 0.3s;
+    text-transform: uppercase;
+  }
+  .nav-links a:hover { opacity: 1; }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-left {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 8rem 4rem 4rem;
+    position: relative;
+    z-index: 2;
+  }
+
+  .hero-eyebrow {
+    font-size: 0.75rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 2rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.3s forwards;
+  }
+
+  .hero-name {
+    font-family: 'Tajawal', sans-serif;
+    font-weight: 900;
+    font-size: clamp(3.5rem, 6vw, 6rem);
+    line-height: 1;
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.5s forwards;
+  }
+
+  .hero-name span {
+    display: block;
+    color: var(--gold);
+    -webkit-text-stroke: 2px var(--gold);
+    color: transparent;
+    font-size: clamp(4rem, 7vw, 7rem);
+  }
+
+  .hero-title {
+    font-size: 1.1rem;
+    font-weight: 300;
+    color: rgba(245,240,232,0.6);
+    line-height: 1.8;
+    margin-bottom: 3rem;
+    max-width: 420px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.7s forwards;
+  }
+
+  .hero-cta {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.9s forwards;
+  }
+
+  .btn-primary {
+    padding: 0.9rem 2.5rem;
+    background: var(--gold);
+    color: var(--ink);
+    font-family: 'Cairo', sans-serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    letter-spacing: 0.08em;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: transform 0.3s, box-shadow 0.3s;
+    clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+  }
+  .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(201,168,76,0.4); }
+
+  .btn-outline {
+    padding: 0.9rem 2.5rem;
+    background: transparent;
+    color: var(--paper);
+    font-family: 'Cairo', sans-serif;
+    font-weight: 600;
+    font-size: 0.9rem;
+    letter-spacing: 0.08em;
+    border: 1px solid rgba(245,240,232,0.3);
+    cursor: pointer;
+    text-decoration: none;
+    transition: border-color 0.3s, color 0.3s;
+  }
+  .btn-outline:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* Hero Right - Visual */
+  .hero-right {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .hero-visual {
+    position: relative;
+    width: 380px;
+    height: 480px;
+  }
+
+  .photo-frame {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .photo-frame::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: 
+      repeating-linear-gradient(
+        -45deg,
+        transparent,
+        transparent 2px,
+        rgba(201,168,76,0.03) 2px,
+        rgba(201,168,76,0.03) 4px
+      );
+  }
+
+  .photo-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: rgba(201,168,76,0.4);
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    gap: 1rem;
+  }
+
+  .photo-placeholder svg { width: 80px; height: 80px; opacity: 0.3; }
+
+  .frame-border {
+    position: absolute;
+    inset: -12px;
+    border: 1px solid rgba(201,168,76,0.3);
+    pointer-events: none;
+  }
+  .frame-corner {
+    position: absolute;
+    width: 24px; height: 24px;
+    border-color: var(--gold);
+    border-style: solid;
+  }
+  .frame-corner.tl { top: -12px; right: -12px; border-width: 2px 2px 0 0; }
+  .frame-corner.tr { top: -12px; left: -12px; border-width: 2px 0 0 2px; }
+  .frame-corner.bl { bottom: -12px; right: -12px; border-width: 0 2px 2px 0; }
+  .frame-corner.br { bottom: -12px; left: -12px; border-width: 0 0 2px 2px; }
+
+  .hero-badge {
+    position: absolute;
+    bottom: -24px;
+    right: -24px;
+    background: var(--gold);
+    color: var(--ink);
+    width: 100px; height: 100px;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 1.4rem;
+    line-height: 1;
+    box-shadow: 0 8px 30px rgba(201,168,76,0.5);
+    animation: spin 20s linear infinite;
+  }
+  .hero-badge small { font-size: 0.55rem; letter-spacing: 0.15em; text-transform: uppercase; }
+
+  /* Floating elements */
+  .float-tag {
+    position: absolute;
+    background: rgba(245,240,232,0.05);
+    border: 1px solid rgba(245,240,232,0.1);
+    backdrop-filter: blur(10px);
+    padding: 0.7rem 1.2rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    color: var(--gold);
+    text-transform: uppercase;
+    font-weight: 600;
+    animation: float 3s ease-in-out infinite;
+  }
+  .float-tag:nth-child(1) { top: 15%; left: -40px; animation-delay: 0s; }
+  .float-tag:nth-child(2) { bottom: 25%; right: -50px; animation-delay: 1.5s; }
+
+  /* Scrolling marquee */
+  .marquee-wrap {
+    background: var(--gold);
+    overflow: hidden;
+    padding: 0.8rem 0;
+    position: relative;
+  }
+  .marquee-track {
+    display: flex;
+    gap: 3rem;
+    animation: marquee 18s linear infinite;
+    width: max-content;
+  }
+  .marquee-item {
+    font-family: 'Tajawal', sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink);
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+  .marquee-item::after { content: '◆'; font-size: 0.5rem; }
+
+  /* SECTIONS SHARED */
+  section { padding: 7rem 4rem; }
+  .section-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .section-label::before {
+    content: '';
+    width: 40px; height: 1px;
+    background: var(--gold);
+  }
+  .section-title {
+    font-family: 'Tajawal', sans-serif;
+    font-weight: 900;
+    font-size: clamp(2.5rem, 4vw, 3.5rem);
+    line-height: 1.1;
+    margin-bottom: 4rem;
+  }
+
+  /* ABOUT */
+  .about { background: var(--ink); }
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    gap: 5rem;
+    align-items: start;
+  }
+  .about-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+  .stat-card {
+    border: 1px solid rgba(201,168,76,0.2);
+    padding: 2rem 1.5rem;
+    position: relative;
+    transition: border-color 0.3s;
+  }
+  .stat-card:hover { border-color: var(--gold); }
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 30px; height: 3px;
+    background: var(--gold);
+  }
+  .stat-number {
+    font-family: 'Tajawal', sans-serif;
+    font-weight: 900;
+    font-size: 2.8rem;
+    color: var(--gold);
+    line-height: 1;
+  }
+  .stat-label { font-size: 0.8rem; color: rgba(245,240,232,0.5); margin-top: 0.5rem; letter-spacing: 0.1em; }
+
+  .about-text p {
+    font-size: 1.05rem;
+    line-height: 2;
+    color: rgba(245,240,232,0.7);
+    margin-bottom: 1.5rem;
+  }
+  .about-text strong { color: var(--gold); font-weight: 700; }
+
+  /* EDUCATION */
+  .education { background: #0d0d14; }
+  .edu-timeline { position: relative; }
+  .edu-timeline::before {
+    content: '';
+    position: absolute;
+    right: 0; top: 0; bottom: 0;
+    width: 1px;
+    background: linear-gradient(to bottom, transparent, var(--gold), transparent);
+    right: 50%;
+    transform: translateX(50%);
+  }
+
+  .edu-item {
+    display: grid;
+    grid-template-columns: 1fr 60px 1fr;
+    gap: 0 2rem;
+    margin-bottom: 4rem;
+    align-items: center;
+  }
+  .edu-item:nth-child(even) .edu-card { grid-column: 3; }
+  .edu-item:nth-child(even) .edu-card-wrapper { grid-column: 1; text-align: left; }
+
+  .edu-dot {
+    width: 16px; height: 16px;
+    background: var(--gold);
+    border-radius: 50%;
+    margin: 0 auto;
+    box-shadow: 0 0 0 6px rgba(201,168,76,0.15), 0 0 20px rgba(201,168,76,0.4);
+    position: relative;
+    z-index: 1;
+  }
+
+  .edu-card {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(201,168,76,0.15);
+    padding: 2rem;
+    position: relative;
+    transition: transform 0.3s, border-color 0.3s;
+  }
+  .edu-card:hover { transform: translateY(-4px); border-color: rgba(201,168,76,0.4); }
+  .edu-year {
+    font-size: 0.7rem;
+    letter-spacing: 0.25em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 0.8rem;
+  }
+  .edu-degree {
+    font-family: 'Tajawal', sans-serif;
+    font-weight: 700;
+    font-size: 1.2rem;
+    margin-bottom: 0.4rem;
+  }
+  .edu-school { font-size: 0.9rem; color: rgba(245,240,232,0.5); margin-bottom: 1rem; }
+  .edu-grade {
+    display: inline-block;
+    padding: 0.25rem 0.8rem;
+    background: rgba(201,168,76,0.1);
+    border: 1px solid rgba(201,168,76,0.3);
+    font-size: 0.75rem;
+    color: var(--gold);
+    letter-spacing: 0.1em;
+  }
+
+  /* SKILLS */
+  .skills { background: var(--ink); }
+  .skills-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+  .skill-group {
+    border-top: 2px solid var(--gold);
+    padding-top: 1.5rem;
+  }
+  .skill-group-title {
+    font-weight: 700;
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1.5rem;
+  }
+  .skill-item {
+    margin-bottom: 1.2rem;
+  }
+  .skill-name {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    color: rgba(245,240,232,0.8);
+  }
+  .skill-bar { height: 3px; background: rgba(255,255,255,0.08); position: relative; overflow: hidden; }
+  .skill-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light));
+    transform-origin: left;
+    animation: growBar 1.5s cubic-bezier(.23,1,.32,1) forwards;
+    transform: scaleX(0);
+  }
+
+  /* PROJECTS */
+  .projects { background: #0d0d14; }
+  .projects-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+  }
+  .project-card {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(245,240,232,0.08);
+    padding: 2.5rem;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.4s cubic-bezier(.23,1,.32,1), border-color 0.3s;
+    cursor: pointer;
+  }
+  .project-card::before {
+    content: '';
+    position: absolute;
+    bottom: 0; right: 0;
+    width: 120px; height: 120px;
+    background: radial-gradient(circle at center, rgba(201,168,76,0.12), transparent);
+    transition: opacity 0.4s;
+    opacity: 0;
+  }
+  .project-card:hover { transform: translateY(-6px); border-color: rgba(201,168,76,0.3); }
+  .project-card:hover::before { opacity: 1; }
+  .project-card.featured {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: center;
+  }
+  .project-num {
+    font-family: 'Tajawal', sans-serif;
+    font-size: 4rem;
+    font-weight: 900;
+    color: rgba(201,168,76,0.1);
+    line-height: 1;
+    margin-bottom: 1.5rem;
+    display: block;
+  }
+  .project-tags { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.2rem; }
+  .tag {
+    padding: 0.2rem 0.7rem;
+    border: 1px solid rgba(245,240,232,0.15);
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(245,240,232,0.5);
+  }
+  .project-name {
+    font-family: 'Tajawal', sans-serif;
+    font-weight: 700;
+    font-size: 1.5rem;
+    margin-bottom: 0.8rem;
+  }
+  .project-desc { font-size: 0.9rem; color: rgba(245,240,232,0.5); line-height: 1.8; }
+  .project-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+    text-decoration: none;
+    transition: gap 0.3s;
+  }
+  .project-link:hover { gap: 1rem; }
+  .project-visual {
+    height: 200px;
+    background: linear-gradient(135deg, rgba(201,168,76,0.05), rgba(26,107,107,0.1));
+    border: 1px solid rgba(201,168,76,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    color: rgba(201,168,76,0.3);
+    text-transform: uppercase;
+  }
+
+  /* TEAMS */
+  .teams { background: var(--ink); }
+  .teams-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+  .team-card {
+    padding: 2.5rem 2rem;
+    border: 1px solid rgba(245,240,232,0.08);
+    position: relative;
+    transition: all 0.4s;
+  }
+  .team-card:hover { background: rgba(201,168,76,0.04); border-color: rgba(201,168,76,0.25); }
+  .team-icon {
+    width: 50px; height: 50px;
+    background: rgba(201,168,76,0.1);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .team-name {
+    font-family: 'Tajawal', sans-serif;
+    font-weight: 700;
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+  }
+  .team-role {
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1rem;
+  }
+  .team-desc { font-size: 0.85rem; color: rgba(245,240,232,0.45); line-height: 1.7; }
+  .team-members {
+    display: flex;
+    margin-top: 1.5rem;
+    gap: -8px;
+  }
+  .member-avatar {
+    width: 28px; height: 28px;
+    background: linear-gradient(135deg, var(--gold), var(--teal));
+    border-radius: 50%;
+    border: 2px solid var(--ink);
+    margin-left: -8px;
+    font-size: 0.6rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  /* CONTACT */
+  .contact {
+    background: #0d0d14;
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+  }
+  .contact::before {
+    content: 'تواصل';
+    font-family: 'Tajawal', sans-serif;
+    font-weight: 900;
+    font-size: 20rem;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: rgba(201,168,76,0.02);
+    white-space: nowrap;
+    user-select: none;
+    pointer-events: none;
+  }
+  .contact-inner { position: relative; z-index: 1; max-width: 600px; margin: 0 auto; }
+  .contact-email {
+    font-family: 'Tajawal', sans-serif;
+    font-size: clamp(1.5rem, 3vw, 2.5rem);
+    font-weight: 700;
+    color: var(--gold);
+    text-decoration: none;
+    display: block;
+    margin: 2rem 0 3rem;
+    transition: opacity 0.3s;
+  }
+  .contact-email:hover { opacity: 0.7; }
+  .social-links { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+  .social-link {
+    padding: 0.7rem 1.5rem;
+    border: 1px solid rgba(245,240,232,0.15);
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(245,240,232,0.6);
+    text-decoration: none;
+    transition: all 0.3s;
+    font-weight: 600;
+  }
+  .social-link:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* FOOTER */
+  footer {
+    background: var(--ink);
+    padding: 2rem 4rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid rgba(245,240,232,0.06);
+    font-size: 0.75rem;
+    color: rgba(245,240,232,0.3);
+    letter-spacing: 0.1em;
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  @keyframes growBar {
+    to { transform: scaleX(1); }
+  }
+
+  /* Scroll reveal */
+  .reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.8s cubic-bezier(.23,1,.32,1), transform 0.8s cubic-bezier(.23,1,.32,1);
+  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    nav { padding: 1.2rem 1.5rem; }
+    .nav-links { display: none; }
+    .hero { grid-template-columns: 1fr; min-height: auto; padding-top: 5rem; }
+    .hero-right { display: none; }
+    section { padding: 4rem 1.5rem; }
+    .about-grid, .skills-grid, .teams-grid { grid-template-columns: 1fr; }
+    .projects-grid { grid-template-columns: 1fr; }
+    .project-card.featured { grid-column: 1; grid-template-columns: 1fr; }
+    .edu-item { grid-template-columns: 1fr; }
+    .edu-timeline::before { display: none; }
+    footer { flex-direction: column; gap: 1rem; text-align: center; }
+    .hero-left { padding: 6rem 1.5rem 3rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">م. أ.</a>
+  <ul class="nav-links">
+    <li><a href="#about">من أنا</a></li>
+    <li><a href="#education">تعليمي</a></li>
+    <li><a href="#projects">مشاريعي</a></li>
+    <li><a href="#teams">فرقي</a></li>
+    <li><a href="#contact">تواصل</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-left">
+    <p class="hero-eyebrow">مرحباً، أنا</p>
+    <h1 class="hero-name">
+      ENG:SAID ABOU MAGHARA
+      <span>هنا</span>
+    </h1>
+    <p class="hero-title">
+      مطوّر · قائد فرق · مبتكر<br>
+      أبني المستقبل بكل سطر كود وكل فكرة جديدة
+    </p>
+    <div class="hero-cta">
+      <a href="#projects" class="btn-primary">استكشف أعمالي</a>
+      <a href="#contact" class="btn-outline">تواصل معي</a>
+    </div>
+  </div>
+
+ 
+      <div class="frame-border"></div>
+      <div class="frame-corner tl"></div>
+      <div class="frame-corner tr"></div>
+      <div class="frame-corner bl"></div>
+      <div class="frame-corner br"></div>
+      <div class="hero-badge">
+        <span>2026</span>
+        <small>الآن</small>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-wrap">
+  <div class="marquee-track">
+    <span class="marquee-item">تطوير الويب</span>
+    <span class="marquee-item">قيادة الفرق</span>
+    <span class="marquee-item">الابتكار التقني</span>
+    <span class="marquee-item">حل المشكلات</span>
+    <span class="marquee-item">إدارة المشاريع</span>
+    <span class="marquee-item">التعلم المستمر</span>
+    <span class="marquee-item">تطوير الويب</span>
+    <span class="marquee-item">قيادة الفرق</span>
+    <span class="marquee-item">الابتكار التقني</span>
+    <span class="marquee-item">حل المشكلات</span>
+    <span class="marquee-item">إدارة المشاريع</span>
+    <span class="marquee-item">التعلم المستمر</span>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<section class="about" id="about">
+  <p class="section-label reveal">عن نفسي</p>
+  <div class="about-grid">
+    <div class="about-stats reveal">
+      <div class="stat-card">
+        <div class="stat-number">1</div>
+        <div class="stat-label">سنوات خبرة</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">2+</div>
+        <div class="stat-label">مشروع منجز</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">2</div>
+        <div class="stat-label">الفرق التي انا  احد اعضائها الأدارية</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">٩٨٪</div>
+        <div class="stat-label">نسبة التنظيم الأدراي</div>
+      </div>
+    </div>
+
+    <div class="about-text reveal">
+      <h2 class="section-title">أهلاً، أنا<br><strong>سعيد </strong></h2>
+      <p>
+        أنا <strong>مطوّر برمجيات وقائد فرق</strong> شغوف بصنع تجارب رقمية استثنائية. أجمع بين العلم والإبداع لبناء حلول تقنية تحل مشاكل حقيقية.
+      </p>
+      <p>
+        بدأت رحلتي منذ المرحلة الثانوية حين اكتشفت شغفي بعالم البرمجة، ولم أتوقف منذ ذلك الحين. أؤمن بأن <strong>التعلم المستمر والعمل الجماعي</strong> هما مفتاح كل نجاح.
+      </p>
+      <p>
+        خارج الكود، أهتم بتطوير الفرق، وقيادة مبادرات مجتمعية، وتحويل الأفكار إلى واقع ملموس.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- EDUCATION -->
+<section class="education" id="education">
+  <p class="section-label reveal">مسيرتي التعليمية</p>
+  <h2 class="section-title reveal">التعليم<br>والشهادات</h2>
+
+  <div class="edu-timeline">
+
+    <!-- University -->
+    <div class="edu-item reveal">
+      <div class="edu-card">
+        <div class="edu-year">2025 — الآن</div>
+        <div class="edu-school">🏛️ جامعة حلب — كليّة هندسة المعلوماتية</div>
+        <p style="font-size:0.85rem;color:rgba(245,240,232,0.45);line-height:1.7;margin-top:0.8rem;">
+          اتخصص في هندسة الذكاء  الاصطناعي وتطوير الأنظمة الذكية، مع التركيز على مشاريع تطبيقية متقدمة.
+        </p>
+        <span class="edu-grade">GPA: </span>
+      </div>
+      <div class="edu-dot"></div>
+      <div></div>
+    </div>
+
+    <!-- High school -->
+    <div class="edu-item reveal">
+      <div></div>
+      <div class="edu-dot"></div>
+      <div class="edu-card">
+        <div class="edu-year">2021 — 2025</div>
+        <div class="edu-degree">شهادة الثانوية العامة — علمي</div>
+        <div class="edu-school">🏫 اكشغلاين — علمي</div>
+        <p style="font-size:0.85rem;color:rgba(245,240,232,0.45);line-height:1.7;margin-top:0.8rem;">
+          تخرّجت بالمرتبة الثانية على ثانوية الاكشغلاين التركية مع التركيز على الرياضيات حيث انني شاركت في امتحان اليوس الدولي للرياضيات، وحصلت على جائزة التفوق الأكاديمي .
+        </p>
+        <span class="edu-grade">92.8 المعدل:٪</span>
+      </div>
+    </div>
+
+    <!-- Certificate -->
+    <div class="edu-item reveal">
+      <div class="edu-card">
+        <div class="edu-year">2025</div>
+        <div class="edu-degree"></div>
+        <div class="edu-school">🏆 programing advices </div>
+        <span class="edu-grade">بتفوق</span>
+      </div>
+      <div class="edu-dot"></div>
+      <div></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- SKILLS -->
+<section class="skills" id="skills">
+  <p class="section-label reveal">ما أُجيده</p>
+  <h2 class="section-title reveal">المهارات<br>التقنية</h2>
+
+  <div class="skills-grid">
+    <div class="skill-group reveal">
+      <div class="skill-group-title">💻 البرمجة</div>
+      <div class="skill-item">
+        <div class="skill-name"><span>Prombt Eng. </span><span>75%</span></div>
+        <div class="skill-bar"><div class="skill-fill" style="width:75%"></div></div>
+      </div>
+      <div class="skill-item">
+        <div class="skill-name"><span>Python</span><span>30%</span></div>
+        <div class="skill-bar"><div class="skill-fill" style="width:30%"></div></div>
+      </div>
+      <div class="skill-item">
+        <div class="skill-name"><span>C++ </span><span>95%</span></div>
+        <div class="skill-bar"><div class="skill-fill" style="width:95%"></div></div>
+      </div>
+    </div>
+
+    <div class="skill-group reveal">
+      <div class="skill-group-title">🌐 تطوير الويب</div>
+      <div class="skill-item">
+        <div class="skill-name"><span>React / Next.js</span><span>65%</span></div>
+        <div class="skill-bar"><div class="skill-fill" style="width:88%"></div></div>
+      </div>
+      <div class="skill-item">
+        <div class="skill-name"><span>Node.js / Express</span><span>80%</span></div>
+        <div class="skill-bar"><div class="skill-fill" style="width:80%"></div></div>
+      </div>
+      <div class="skill-item">
+        <div class="skill-name"><span>html/Css</span><span>92%</span></div>
+        <div class="skill-bar"><div class="skill-fill" style="width:92%"></div></div>
+      </div>
+    </div>
+
+    <div class="skill-group reveal">
+        <div class="skill-group-title">🛠️ أدوات وأخرى</div>
+        <div class="skill-item">
+            <div class="skill-name"><span> GitHub</span><span>95%</span></div>
+            <div class="skill-bar"><div class="skill-fill" style="width:95%"></div></div>
+        </div>
+        <div class="skill-item">
+            <div class="skill-name"><span>Codeforces</span><span>70%</span></div>
+            <div class="skill-bar"><div class="skill-fill" style="width:70%"></div></div>
+        </div>
+        <div class="skill-item">
+            <div class="skill-name"><span>قيادة الفرق</span><span>95%</span></div>
+            <div class="skill-bar"><div class="skill-fill" style="width:95%"></div></div>
+        </div>
+        <div class="skill-item">
+            <div class="skill-name"><span>إدارة المشاريع</span><span>85%</span></div>
+            <div class="skill-bar"><div class="skill-fill" style="width:85%"></div></div>
+        </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROJECTS -->
+<section class="projects" id="projects">
+  <p class="section-label reveal">ما بنيته</p>
+  <h2 class="section-title reveal">أبرز<br>المشاريع</h2>
+
+  <div class="projects-grid">
+    <!-- Featured -->
+    <div class="project-card featured reveal">
+      <div>
+        <span class="project-num">01</span>
+        <div class="project-tags">
+          <span class="tag">React</span>
+          <span class="tag">Node.js</span>
+          <span class="tag">AI</span>
+        </div>
+        <h3 class="project-name"> C++ مشروع لعبة بسيطة في </h3>
+        <p class="project-desc">
+            قوم المشروع بشكل مثلي ومرن لعب لعبة حجرة ورقصة مقص مع الكمبيوتر وهذا هز نظام ذكاء اصطناعي مبسط.C++ ان هذا المشروع كان اول مشروع لي ,في مسيرة تعلمي لي 
+        </p>
+        <a href="#" class="project-link">https://github.com/saidaboumaghara-ctrl/My-Project1/commit/8a17c18177f0c0f629469c5441961ac9fe23e556 →</a>
+      </div>
+      <div class="project-visual">معاينة المشروع</div>
+    </div>
+
+    <!-- Project 2 -->
+    <div class="project-card reveal">
+      <span class="project-num">02</span>
+      <div class="project-tags">
+        <span class="tag">Python</span>
+        <span class="tag">ML</span>
+      </div>
+      <h3 class="project-name">مشروعك الثاني</h3>
+      <p class="project-desc">وصف موجز للمشروع. ما هدفه وكيف أنجزته؟ ما الذي تعلمته منه؟</p>
+      <a href="#" class="project-link">التفاصيل →</a>
+    </div>
+</section>
+
+<!-- TEAMS -->
+<section class="teams" id="teams">
+  <p class="section-label reveal">ما أقوده</p>
+  <h2 class="section-title reveal">الفرق<br>التي أديرها</h2>
+
+  <div class="teams-grid">
+      <div class="team-card reveal">
+          <<div class="team-icon">💡</div>
+          <div class="team-name">BlueBits28</div>
+          <div class="team-role">قائد الفريق — l</div>
+          <p class="team-desc">
+              ان هذا االفريق يعتبر فريق رسمي لكلية الهندسة المعلومانية في جامعة حلب.كما انه احد اشهر الفرق .يقوم الفريق بقوية ودعم التعليم في الجامعة
+              كما ان هذا الفريق مؤسسة كاملة متكاملة لديها الية معينة ونظام يتبعه .الفريق عمره 10 اعوام كمسؤول للفريق الدفعة 28 قمت ببناء تعاون مشترك بين الفريق والدكاترة
+              كما انني حققت نجاح في زيادة سرعة الفريق .وانا اكتسبت خبرات عديدة من هذا الفريق ابرزها التنظيم والادراة.
+          </p>
+          <div class="team-members">
+              <div class="member-avatar">أ</div>
+              <div class="member-avatar">ب</div>
+              <div class="member-avatar">ج</div>
+              <div class="member-avatar">+٥</div>
+          </div>
+      </div>
+
+      
+      <div class="team-card reveal">
+          <div class="team-icon">🚀</div>
+          <div class="team-name">TeknoSyria</div>
+          <div class="team-role">مسوؤل التظيم </div>
+          <p class="team-desc">
+              ان هذا الفريق هول اول فريق  سوف يشارك في المسابقة التكنولوجيا التركية تكنوفست تم تأسيس هذا الفريق من
+              طرف زميلي المهندس محمد المحمد يستهدف الفريق تمثيل سوريا على مستوى دولي
+          </p>
+          <div class="team-members">
+              <div class="member-avatar">د</div>
+              <div class="member-avatar">ه</div>
+              <div class="member-avatar">+٣</div>
+          </div>
+      </div>
+
+
+</section>
+
+<!-- CONTACT -->
+<section class="contact" id="contact">
+  <div class="contact-inner">
+    <p class="section-label reveal" style="justify-content:center">هل لديك فكرة؟</p>
+    <h2 class="section-title reveal" style="text-align:center">لنبني<br>شيئاً رائعاً معاً</h2>
+    <a href="mailto:saidaboumaghara@gmail.com" class="contact-email reveal">saidaboumaghara@gmail.com</a>
+    <div class="social-links reveal">
+        <a href="https://www.instagram.com/eng_said_abu" target="_blank">Instagram</a>
+        <a href="https://github.com/saidaboumaghara-ctrl" target="_blank">GitHub</a>
+        <a href="https://codeforces.com/profile/engsaidabu" target="_blank">CodeForces</a>
+
+        <a href="https://t.me/engsaidabou" target="_blank">Telegram</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <span>© 2025 — Eng:Said abou maghara</span>
+  <span>صُنع بـ ❤️ وكثير من ☕</span>
+</footer>
+
+<script>
+  // Custom Cursor
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    cursor.style.left = mx + 'px';
+    cursor.style.top = my + 'px';
+  });
+
+  function animRing() {
+    rx += (mx - rx) * 0.12;
+    ry += (my - ry) * 0.12;
+    ring.style.left = rx + 'px';
+    ring.style.top = ry + 'px';
+    requestAnimationFrame(animRing);
+  }
+  animRing();
+
+  document.querySelectorAll('a, button').forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      cursor.style.transform = 'translate(-50%,-50%) scale(2.5)';
+      ring.style.transform = 'translate(-50%,-50%) scale(1.5)';
+      ring.style.opacity = '0.2';
+    });
+    el.addEventListener('mouseleave', () => {
+      cursor.style.transform = 'translate(-50%,-50%) scale(1)';
+      ring.style.transform = 'translate(-50%,-50%) scale(1)';
+      ring.style.opacity = '0.5';
+    });
+  });
+
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        // Stagger children
+        const siblings = entry.target.parentElement.querySelectorAll('.reveal');
+        siblings.forEach((s, i) => {
+          setTimeout(() => s.classList.add('visible'), i * 80);
+        });
+      }
+    });
+  }, { threshold: 0.15 });
+
+  reveals.forEach(el => observer.observe(el));
+
+  // Skill bars animate on scroll
+  const skillObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.querySelectorAll('.skill-fill').forEach(fill => {
+          fill.style.animationPlayState = 'running';
+        });
+      }
+    });
+  }, { threshold: 0.3 });
+
+  document.querySelectorAll('.skills-grid').forEach(el => skillObserver.observe(el));
+  document.querySelectorAll('.skill-fill').forEach(f => f.style.animationPlayState = 'paused');
+</script>
+</body>
+</html>
